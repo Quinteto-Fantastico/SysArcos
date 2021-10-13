@@ -4,13 +4,13 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using SysArcos;
 using SysArcos.utils;
-
-namespace SysArcos.formularios.parentesco_assistido
+namespace ProjetoArcos
 {
-    public partial class frmparentescoassistido : System.Web.UI.Page
+    public partial class frmTipoAssistencia : System.Web.UI.Page
     {
-        private String COD_VIEW = "PASS";
+        private String COD_VIEW = "TASS";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -20,29 +20,32 @@ namespace SysArcos.formularios.parentesco_assistido
                     String pagina = HttpContext.Current.Request.Url.AbsolutePath;
                     validaPermissao(pagina);
 
-                    String parentesco = Request.QueryString["ID"];
-                    if ((parentesco != null) && (!parentesco.Equals("")))
+                    String evento = Request.QueryString["ID"];
+                    if ((evento != null) && (!evento.Equals("")))
                     {
-                        GRAU_DEPENDENCIA g = entities.GRAU_DEPENDENCIA.FirstOrDefault(x => x.ID.ToString().Equals(parentesco));
-                        if (g != null)
+                        TIPO_EVENTO u = entities.TIPO_EVENTO.FirstOrDefault(x => x.ID.ToString().Equals(evento));
+                        if (u != null)
                         {
-                            lblID.Text = g.ID.ToString();
-                            txtParentesco.Text = g.DESCRICAO;
+                            lblID.Text = u.ID.ToString();
+                            txtDescricaoEvento.Text = u.DESCRICAO;
+                            txtTipoEvento.Text = u.NOME;
                             lblAcao.Text = "ALTERANDO";
                         }
                     }
+
                 }
             }
         }
 
-        protected void btnNovo_Click(object sender, EventArgs e)
+        protected void TextBox1_TextChanged(object sender, EventArgs e)
         {
-            limpar();
+
         }
 
-        protected void btnSalvar_Click(object sender, EventArgs e)
+        protected void btnCadastrar_Click(object sender, EventArgs e)
         {
-            if (txtParentesco.Text == "")
+
+            if (txtTipoEvento.Text == "" || txtDescricaoEvento.Text == "")
             {
                 Response.Write("<script>alert('Há campos obrigatorios não preenchidos!');</script>");
             }
@@ -61,24 +64,30 @@ namespace SysArcos.formularios.parentesco_assistido
                         }
                         else
                         {
+                            String pagina = HttpContext.Current.Request.Url.AbsolutePath;
+                            validaPermissao(pagina);
 
-                            GRAU_DEPENDENCIA gd = null;
+                            TIPO_EVENTO tipo_evento = null;
 
                             if (lblAcao.Text.Equals("NOVO"))
                             {
-                                gd = new GRAU_DEPENDENCIA();
+                                tipo_evento = new TIPO_EVENTO();
                                 //entidade.ID = Convert.ToInt32(txtID.Text);
-                                gd.DESCRICAO = txtParentesco.Text;
+                                tipo_evento.NOME = txtTipoEvento.Text;
+                                tipo_evento.DESCRICAO = txtDescricaoEvento.Text;
 
                                 // Insere o objeto
-                                entity.GRAU_DEPENDENCIA.Add(gd);
+                                entity.TIPO_EVENTO.Add(tipo_evento);
 
                             }
                             else
                             {
-                                gd = entity.GRAU_DEPENDENCIA.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
-                                gd.DESCRICAO = txtParentesco.Text;
-                                entity.Entry(gd);
+                                tipo_evento = entity.TIPO_EVENTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+
+                                tipo_evento.NOME = txtTipoEvento.Text;
+                                tipo_evento.DESCRICAO = txtDescricaoEvento.Text;
+
+                                entity.Entry(tipo_evento);
                             }
 
 
@@ -88,9 +97,10 @@ namespace SysArcos.formularios.parentesco_assistido
                             limpar();
 
                             // Commit
-                            Response.Write("<script>alert('Parentesco assistido cadastrado com sucesso!');</script>");
+                            Response.Write("<script>alert('Tipo de evento cadastrado com sucesso!');</script>");
 
-                            txtParentesco.Text = string.Empty;
+                            txtTipoEvento.Text = string.Empty;
+                            txtDescricaoEvento.Text = string.Empty;
                             lblAcao.Text = "NOVO";
                         }
                     }
@@ -102,14 +112,21 @@ namespace SysArcos.formularios.parentesco_assistido
             }
         }
 
-        protected void btnBuscar_Click(object sender, EventArgs e)
+        protected void Button1_Click(object sender, EventArgs e)
         {
-            Response.Redirect("frmbuscaparentescoassistido.aspx");
+            limpar();
+        }
+
+        protected void Button2_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("frmbuscatipoevento.aspx");
         }
 
         private void limpar()
         {
-            txtParentesco.Text = string.Empty;
+            txtTipoEvento.Text = string.Empty;
+            txtDescricaoEvento.Text = string.Empty;
+            lblAcao.Text = "NOVO";
         }
 
         private void validaPermissao(String pagina)

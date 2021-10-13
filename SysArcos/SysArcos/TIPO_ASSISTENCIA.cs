@@ -12,21 +12,18 @@ namespace SysArcos
     using System;
     using System.Collections.Generic;
     
-    public partial class GRUPO_PERMISSAO
+    public partial class TIPO_ASSISTENCIA
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public GRUPO_PERMISSAO()
+        public TIPO_ASSISTENCIA()
         {
-            this.USUARIO = new HashSet<USUARIO>();
-            this.SISTEMA_ITEM_ENTIDADE = new HashSet<SISTEMA_ITEM_ENTIDADE>();
+            this.ASSISTENCIA = new HashSet<ASSISTENCIA>();
         }
     
         public int ID { get; set; }
         public string DESCRICAO { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<USUARIO> USUARIO { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SISTEMA_ITEM_ENTIDADE> SISTEMA_ITEM_ENTIDADE { get; set; }
+        public virtual ICollection<ASSISTENCIA> ASSISTENCIA { get; set; }
     }
 }

@@ -5,10 +5,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class frmbuscaassistencia : System.Web.UI.Page
     {
+        private String COD_VIEW = "ASSD";
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -24,27 +26,37 @@ namespace ProjetoArcos
         {
             if (grid.SelectedValue != null)
                 //Redireciona para a página de cadastro com o login como parâmtro
-                Response.Redirect("frmassistencia.aspx?descricao=" + grid.SelectedValue.ToString());
+                Response.Redirect("frmassistencia.aspx?ID=" + grid.SelectedValue.ToString());
         }
 
         protected void btnRemover_Click(object sender, EventArgs e)
         {
             if (grid.SelectedValue != null)
             {
-                string login = grid.SelectedValue.ToString();
+                string ID = grid.SelectedValue.ToString();
                 using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
                     try
                     {
-                        ASSISTENCIA descricao = entities.ASSISTENCIA.FirstOrDefault(x => x.DESCRICAO.Equals(login));
-                        entities.ASSISTENCIA.Remove(descricao);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
+                            ASSISTENCIA assistencia = entities.ASSISTENCIA.FirstOrDefault(x => x.ID.ToString().Equals(ID));
+                            entities.ASSISTENCIA.Remove(assistencia);
+                            entities.SaveChanges();
 
-                        //Limpar Grid 
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            //Limpar Grid 
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
                     }
                     catch
                     {
@@ -56,7 +68,13 @@ namespace ProjetoArcos
 
         protected void btnBuscar_Click(object sender, EventArgs e)
         {
-
+            using (ARCOS_Entities entities = new ARCOS_Entities())
+            {
+                IQueryable<ASSISTENCIA> query = entities.ASSISTENCIA.Where(x => x.ASSISTIDO.CPF.Equals(txtBusca.Text));
+                var lista = query.ToList();
+                grid.DataSource = lista;
+                grid.DataBind();
+            }
         }
     }
 }
