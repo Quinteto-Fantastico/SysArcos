@@ -121,7 +121,7 @@
         <br />
         <div class="row">
             <div class="col-12 col-lg-4 row_buttons">
-                <asp:Button ID="btnNovo" runat="server" Text="Novo" CssClass="btn btn-primary" Width="100%" />
+                <asp:Button ID="btnNovo" runat="server" Text="Novo" CssClass="btn btn-primary" Width="100%" OnClick="btnNovo_Click" />
             </div>
             <div class="col-12 col-lg-4 row_buttons">
                 <asp:Button ID="btnSalvar" runat="server" Text="Salvar" CssClass="btn btn-primary" OnClick="btnSalvar_Click" Width="100%" ValidationGroup="form"/>
