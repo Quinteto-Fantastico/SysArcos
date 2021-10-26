@@ -4,11 +4,13 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using SysArcos.utils;
 
 namespace SysArcos.formularios.doacao
 {
     public partial class frmdoacao : System.Web.UI.Page
     {
+        private String COD_VIEW = "DACO";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -31,14 +33,85 @@ namespace SysArcos.formularios.doacao
         }
 
 
-        protected void Button3_Click(object sender, EventArgs e)
+        protected void btnBuscar_Click(object sender, EventArgs e) //Buscar
         {
             Response.Redirect("frmbuscadoacao.aspx");
         }
 
-        protected void Button2_Click(object sender, EventArgs e)
+        protected void btnSalvar_Click(object sender, EventArgs e) //Salvar
         {
+            if (txtData.Text == "" || txtDoacao.Text == "" || txtObs.Text == "")
+            {
+                Response.Write("Há campos obrigatórios não preenchidos");
+            }
+            else
+            {
+                 /*try //só treino(apagar)
+                 {
+                     using (ARCOS_Entities entities = new ARCOS_Entities())
+                     {
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                               Session["usuariologado"].ToString(),
+                                               COD_VIEW,
+                                               entities))
+                        {
+                            Response.Write("<script>alert('Permissão Negada');</script>");
+                        }
+                        else
+                        {
+                            DOACAO doacao = null;
 
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                doacao = new DOACAO();
+                            }
+                            else
+                            {
+                                doacao = entities.DOACAO.FirstOrDefault(linha => linha.ID.ToString().Equals(txtDoacao.Text));
+                            }
+
+                            doacao.DESCRICAO = txtDoacao.Text;
+                            doacao.DATA = DateTime.ParseExact(txtData.Text, "dd/MM/yyyy", null);
+                            doacao.DOADOR = entities.DOADOR.FirstOrDefault(linha => linha.ID.ToString().Equals(ddlDoador.SelectedValue));
+                            doacao.ENTIDADE = entities.ENTIDADE.FirstOrDefault(linha => linha.ID.ToString().Equals(ddlEntidade.SelectedValue));
+                            doacao.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                            doacao.OBSERVACOES = txtObs.Text;
+
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                entities.DOACAO.Add(doacao);
+                            }
+                            else
+                            {
+                                entities.Entry(doacao);
+                            }
+                            entities.SaveChanges();
+                            limpar();
+                        }
+                     }
+                 }
+                 catch
+                 {
+                     Response.Write("Registro não pode ser salvo!");
+                 }*/
+            }
+        }
+
+        private void limpar()
+        {
+            if (ddlEntidade.Items.Count == 2)
+            {
+                ddlEntidade.SelectedIndex = 1;
+            }
+            else
+            {
+                ddlEntidade.SelectedIndex = 0;
+            }
+            txtData.Text = DateTime.Now.ToString("dd/MM/yyyy");
+            txtDoacao.Text = string.Empty;
+            txtObs.Text = string.Empty;
+            ddlDoador.SelectedIndex = 0;
+            //lblAcao.Text = "NOVO";
         }
 
         private void carregaEntidade(ARCOS_Entities conn)
@@ -59,6 +132,11 @@ namespace SysArcos.formularios.doacao
             ddlDoador.DataSource = list;
             ddlDoador.DataBind();
             ddlDoador.Items.Insert(0, "");
+        }
+
+        protected void btnNovo_Click(object sender, EventArgs e)
+        {
+            limpar();
         }
     }
 }

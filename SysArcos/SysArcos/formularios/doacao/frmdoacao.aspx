@@ -55,13 +55,13 @@
     <br/>
     <div class="row">
         <div class="col-12 col-lg-4 row_buttons">
-            <asp:Button ID="Button1" runat="server" CssClass="btn btn-primary" Width="100%" Text="Novo" />
+            <asp:Button ID="btnNovo" runat="server" CssClass="btn btn-primary" Width="100%" Text="Novo" OnClick="btnNovo_Click" />
         </div>
         <div class="col-12 col-lg-4 row_buttons">
-            <asp:Button ID="Button2" runat="server" CssClass="btn btn-primary" Width="100%" Text="Salvar" OnClick="Button2_Click" ValidationGroup="form" />
+            <asp:Button ID="btnSalvar" runat="server" CssClass="btn btn-primary" Width="100%" Text="Salvar" OnClick="btnSalvar_Click" ValidationGroup="form" />
         </div>
         <div class="col-12 col-lg-4 row_buttons">
-            <asp:Button ID="Button3" runat="server" CssClass="btn btn-primary" Width="100%" Text="Buscar" OnClick="Button3_Click" />
+            <asp:Button ID="btnBuscar" runat="server" CssClass="btn btn-primary" Width="100%" Text="Buscar" OnClick="btnBuscar_Click" />
         </div>
     </div>
 </asp:Content>
