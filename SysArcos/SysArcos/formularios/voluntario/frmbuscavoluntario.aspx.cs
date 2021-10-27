@@ -5,14 +5,37 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class frmbuscavoluntario : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            private void validapermisao(string pagina)
+            {
+                using (ARCOS_Entities conn new ARCOS_Entities())
+                       
+            {
+                string login = (string)Session["usuariologado"];
 
+                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                if (!u.ADM)
+                {
+                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
+                    if (item != null)
+                    {
+                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                        if (perm == null)
+                        {
+                            Response.Redirect("/permissaonegada.aspx");
+                        }
+                    }
+
+                }
+            }
         }
+    }
 
         protected void btn_Voltar_Click(object sender, EventArgs e)
         {
