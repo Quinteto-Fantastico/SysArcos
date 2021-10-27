@@ -5,13 +5,46 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class frmbuscatiporecurso : System.Web.UI.Page
     {
+        private String COD_VIEW = "CRLT";
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (!IsPostBack)
+            {
+                using (ARCOS_Entities entities = new ARCOS_Entities())
+                {
+                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
+                    validaPermissao(pagina);
 
+                }
+            }
+
+        }
+        private void validaPermissao(String pagina)
+        {
+            using (ARCOS_Entities entity = new ARCOS_Entities())
+            {
+                string login = (string)Session["usuariologado"];
+                USUARIO u =
+                    entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                if (!u.ADM)
+                {
+                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
+                    if (item != null)
+                    {
+                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                        if (perm == null)
+                        {
+                            Response.Redirect("/permissao_negada.aspx");
+                        }
+                    }
+                }
+            }
         }
 
         protected void btnbuscar_Click(object sender, EventArgs e)
@@ -46,24 +79,35 @@ namespace ProjetoArcos
             if (Grid.SelectedValue != null)
             {
                 string ID = Grid.SelectedValue.ToString();
-                try
+                using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    using (ARCOS_Entities entities = new ARCOS_Entities())
+                    try
                     {
-                        TIPO_RECURSO TIPO_RECURSO = entities.TIPO_RECURSO.FirstOrDefault(x => x.ID.ToString().Equals(ID));
-                        entities.TIPO_RECURSO.Remove(TIPO_RECURSO);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                           Session["usuariologado"].ToString(),
+                                           COD_VIEW,
+                                           entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
+                            TIPO_RECURSO TIPO_RECURSO = entities.TIPO_RECURSO.FirstOrDefault(x => x.ID.ToString().Equals(ID));
+                            entities.TIPO_RECURSO.Remove(TIPO_RECURSO);
+                            entities.SaveChanges();
 
-                        Grid.DataSource = null;
-                        Grid.DataBind();
-                        Grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            Grid.DataSource = null;
+                            Grid.DataBind();
+                            Grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
+                    }
+                    catch
+                    {
+                        Response.Write("<script>alert('Falha ao remover registro!');</script>");
                     }
                 }
-                catch
-                {
-                    Response.Write("<script>alert('Falha ao remover registro!');</script>");
-                }
+
             }
         }
 

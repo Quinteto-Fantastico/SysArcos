@@ -5,20 +5,26 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class formusuario : System.Web.UI.Page
     {
+        private String COD_VIEW = "USUA";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                carregaPermissoes();
-                String login = Request.QueryString["login"];
-                if ((login!=null) && (!login.Equals("")))
+                using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    using (ARCOS_Entities entities = new ARCOS_Entities())
+                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
+                    validaPermissao(pagina);
+
+                    carregaPermissoes();
+                    String login = Request.QueryString["login"];
+                    if ((login != null) && (!login.Equals("")))
                     {
+
                         USUARIO u = entities.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login));
                         if (u != null)
                         {
@@ -53,43 +59,53 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-                        USUARIO usuario = null;
-                        if (lblAcao.Text.Equals("NOVO"))
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                        Session["usuariologado"].ToString(),
+                        COD_VIEW,
+                        entity))
                         {
-                            usuario = new USUARIO();
-                            usuario.LOGIN = txt_user.Text;
-
-                            usuario.SENHA = txt_senhaUsuario.Text;
-                            usuario.NOME = txt_nomeUsuario.Text.ToUpper();
-                            usuario.CPF = txt_cpf.Text;
-                            usuario.EMAIL = txt_email.Text.ToLower();
-                            usuario.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            usuario.ADM = ckAdministrador.Checked;
-                            usuario.ATIVO = CB_ativo.Checked;
-                            usuario.ALTERA_SENHA_PROX_LOGIN = CB_AlteraProxLogin.Checked;
-                            usuario.ID_GRUPOPERMISSAO = Convert.ToInt32(ddlPermissao.SelectedValue);
-                            entity.USUARIO.Add(usuario);
+                            Response.Write("<script>alert('Permissão Negada');</script>");
                         }
+
                         else
                         {
-                            usuario = entity.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(txt_user.Text));
+                            USUARIO usuario = null;
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                usuario = new USUARIO();
+                                usuario.LOGIN = txt_user.Text;
 
+                                usuario.SENHA = txt_senhaUsuario.Text;
+                                usuario.NOME = txt_nomeUsuario.Text.ToUpper();
+                                usuario.CPF = txt_cpf.Text;
+                                usuario.EMAIL = txt_email.Text.ToLower();
+                                usuario.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                usuario.ADM = ckAdministrador.Checked;
+                                usuario.ATIVO = CB_ativo.Checked;
+                                usuario.ALTERA_SENHA_PROX_LOGIN = CB_AlteraProxLogin.Checked;
+                                usuario.ID_GRUPOPERMISSAO = Convert.ToInt32(ddlPermissao.SelectedValue);
+                                entity.USUARIO.Add(usuario);
+                            }
+                            else
+                            {
+                                usuario = entity.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(txt_user.Text));
 
-                            usuario.SENHA = txt_senhaUsuario.Text;
-                            usuario.NOME = txt_nomeUsuario.Text.ToUpper();
-                            usuario.CPF = txt_cpf.Text;
-                            usuario.EMAIL = txt_email.Text.ToLower();
-                            usuario.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            usuario.ADM = ckAdministrador.Checked;
-                            usuario.ATIVO = CB_ativo.Checked;
-                            usuario.ALTERA_SENHA_PROX_LOGIN = CB_AlteraProxLogin.Checked;
-                            usuario.ID_GRUPOPERMISSAO = Convert.ToInt32(ddlPermissao.SelectedValue);
-                            entity.Entry(usuario);
+                                usuario.SENHA = txt_senhaUsuario.Text;
+                                usuario.NOME = txt_nomeUsuario.Text.ToUpper();
+                                usuario.CPF = txt_cpf.Text;
+                                usuario.EMAIL = txt_email.Text.ToLower();
+                                usuario.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                usuario.ADM = ckAdministrador.Checked;
+                                usuario.ATIVO = CB_ativo.Checked;
+                                usuario.ALTERA_SENHA_PROX_LOGIN = CB_AlteraProxLogin.Checked;
+                                usuario.ID_GRUPOPERMISSAO = Convert.ToInt32(ddlPermissao.SelectedValue);
+                                entity.Entry(usuario);
+                            }
+                            limpar();
+                            entity.SaveChanges();
+
+                            Response.Write("<script>alert('Usuario salvo com Sucesso!');</script>");
                         }
-                        limpar();
-                        entity.SaveChanges();
-
-                        Response.Write("<script>alert('Usuario salvo com Sucesso!');</script>");
                     }
                 }
                 catch
@@ -134,6 +150,28 @@ namespace ProjetoArcos
                 ddlPermissao.DataSource = list;
                 ddlPermissao.DataBind();
                 ddlPermissao.Items.Insert(0, "");
+            }
+        }
+
+        private void validaPermissao(String pagina)
+        {
+            using (ARCOS_Entities entity = new ARCOS_Entities())
+            {
+                string login = (string)Session["usuariologado"];
+                USUARIO u =
+                    entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                if (!u.ADM)
+                {
+                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
+                    if (item != null)
+                    {
+                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                        if (perm == null)
+                        {
+                            Response.Redirect("/permissao_negada.aspx");
+                        }
+                    }
+                }
             }
         }
     }

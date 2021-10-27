@@ -5,14 +5,45 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 
 namespace ProjetoArcos
 {
     public partial class frmbuscausuario : System.Web.UI.Page
     {
+        private String COD_VIEW = "COUR";
         protected void Page_Load(object sender, EventArgs e)
         {
-           
+            if (!IsPostBack)
+            {
+                using (ARCOS_Entities entities = new ARCOS_Entities())
+                {
+                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
+                    validaPermissao(pagina);
+
+                }
+            }
+        }
+        private void validaPermissao(String pagina)
+        {
+            using (ARCOS_Entities entity = new ARCOS_Entities())
+            {
+                string login = (string)Session["usuariologado"];
+                USUARIO u =
+                    entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                if (!u.ADM)
+                {
+                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
+                    if (item != null)
+                    {
+                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                        if (perm == null)
+                        {
+                            Response.Redirect("/permissao_negada.aspx");
+                        }
+                    }
+                }
+            }
         }
 
         protected void btnCancelar_Click(object sender, EventArgs e)
@@ -23,7 +54,7 @@ namespace ProjetoArcos
         protected void btnBuscar_Click(object sender, EventArgs e)
         {
             buscar();
-           
+
         }
 
         protected void btnSelecionar_Click(object sender, EventArgs e)
@@ -35,7 +66,7 @@ namespace ProjetoArcos
 
         protected void btnRemover_Click(object sender, EventArgs e)
         {
-            if (grid.SelectedValue==null)
+            if (grid.SelectedValue == null)
             {
                 Response.Write("<script>alert('NÃO É POSSÍVEL EXCLUIR, NÃO FOI SELECIONADO NENHUM VALOR');</script>");
             }
@@ -45,29 +76,40 @@ namespace ProjetoArcos
             if (grid.SelectedValue != null)
             {
                 string login = grid.SelectedValue.ToString();
-                try
+                using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    using (ARCOS_Entities entities = new ARCOS_Entities())
+                    try
                     {
-                        USUARIO usuario = entities.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login));
-                        entities.USUARIO.Remove(usuario);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                        Session["usuariologado"].ToString(),
+                        COD_VIEW,
+                        entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
 
-                        //Limpar Grid 
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            USUARIO usuario = entities.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login));
+                            entities.USUARIO.Remove(usuario);
+                            entities.SaveChanges();
+
+                            //Limpar Grid 
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
+                    }
+                    catch
+                    {
+
+                        Response.Write("<script>alert('Falha ao remover registro!');</script>");
                     }
                 }
-                catch
-                {
-                    
-                    Response.Write("<script>alert('Falha ao remover registro!');</script>");
-                }
+
             }
 
-            
         }
 
         protected void btnPermissoes_Click(object sender, EventArgs e)
@@ -93,7 +135,7 @@ namespace ProjetoArcos
 
         private void buscar()
         {
-           
+
             using (ARCOS_Entities entities = new ARCOS_Entities())
             {
                 List<USUARIO> lista = null;
