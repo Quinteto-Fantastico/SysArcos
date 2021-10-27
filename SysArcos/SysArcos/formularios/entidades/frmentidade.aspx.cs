@@ -5,14 +5,18 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class cadentidade1 : System.Web.UI.Page
     {
+        private string COD_VIEW = "ENTD";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
+
                 carregaAdministradores();
                 String ID = Request.QueryString["ID"];
                 if ((ID != null) && (!ID.Equals("")))
@@ -50,50 +54,59 @@ namespace ProjetoArcos
             ENTIDADE entidade = null;
             try
             {
-                // Criar conexão com o banco
-                using (ARCOS_Entities entity = new ARCOS_Entities())
-                {
 
-
-                    if (txtNomeEntidade.Text == "" || txtLogradouro.Text == "" || txtNumero.Text == "" || txtBairro.Text == "" || txtCEP.Text == ""
+                if (txtNomeEntidade.Text == "" || txtLogradouro.Text == "" || txtNumero.Text == "" || txtBairro.Text == "" || txtCEP.Text == ""
                         || txtCidade.Text == "" || drpEstado.Text == "" || txtPresidente.Text == "" || txtCNPJ.Text == "" || txtTelefone.Text == "")
+                {
+                    Response.Write("<script>alert('Há campos obrigatorios não preenchidos!');</script>");
+                }
+                else
+                {
+                    //Conexão ao banco e validação de permissões para alterar (.utils)
+                    using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-                        Response.Write("<script>alert('Há campos obrigatorios não preenchidos!');</script>");
-                    }
-                    else
-                    {
-                        if (lblAcao.Text.Equals("NOVO"))
-                            entidade = new ENTIDADE();
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                            Session["usuariologado"].ToString(),
+                            COD_VIEW,
+                            entity))
+                        {
+                            Response.Write("<script>alert('Permissão Negada');</script>");
+                        }
                         else
-                            entidade = entity.ENTIDADE.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+                        {
+                            if (lblAcao.Text.Equals("NOVO"))
+                                entidade = new ENTIDADE();
+                            else
+                                entidade = entity.ENTIDADE.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
 
-                        //entidade.ID = Convert.ToInt32(txtID.Text);
-                        entidade.NOME = txtNomeEntidade.Text;
-                        entidade.LOGRADOURO = txtLogradouro.Text;
-                        entidade.NUMERO = txtNumero.Text;
-                        entidade.BAIRRO = txtBairro.Text;
-                        entidade.CEP = txtCEP.Text;
-                        entidade.CIDADE = txtCidade.Text;
-                        entidade.ESTADO = drpEstado.Text;
-                        //entidade.ID_ENTIDADE_CONTROLADORA = Convert.ToInt32(drpControladora.Text);
-                        entidade.PRESIDENTE = txtPresidente.Text;
-                        entidade.CNPJ = txtCNPJ.Text;
-                        entidade.TELEFONE = txtTelefone.Text;
-                        entidade.LOGIN_USUARIO_ADMINISTRADOR = txtAdmnistrador.Text;
-                        entidade.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                        entidade.ATIVA = cbAtivo.Checked;
+                            //entidade.ID = Convert.ToInt32(txtID.Text);
+                            entidade.NOME = txtNomeEntidade.Text;
+                            entidade.LOGRADOURO = txtLogradouro.Text;
+                            entidade.NUMERO = txtNumero.Text;
+                            entidade.BAIRRO = txtBairro.Text;
+                            entidade.CEP = txtCEP.Text;
+                            entidade.CIDADE = txtCidade.Text;
+                            entidade.ESTADO = drpEstado.Text;
+                            //entidade.ID_ENTIDADE_CONTROLADORA = Convert.ToInt32(drpControladora.Text);
+                            entidade.PRESIDENTE = txtPresidente.Text;
+                            entidade.CNPJ = txtCNPJ.Text;
+                            entidade.TELEFONE = txtTelefone.Text;
+                            entidade.LOGIN_USUARIO_ADMINISTRADOR = txtAdmnistrador.Text;
+                            entidade.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                            entidade.ATIVA = cbAtivo.Checked;
 
-                        if (lblAcao.Text.Equals("NOVO"))
-                            entity.ENTIDADE.Add(entidade);
-                        else
-                            entity.Entry(entidade);
+                            if (lblAcao.Text.Equals("NOVO"))
+                                entity.ENTIDADE.Add(entidade);
+                            else
+                                entity.Entry(entidade);
 
-                        entity.SaveChanges();
+                            entity.SaveChanges();
 
-                        // Commit
-                        Response.Write("<script>alert('Entidade cadastrada com sucesso!');</script>");
+                            // Commit
+                            Response.Write("<script>alert('Entidade cadastrada com sucesso!');</script>");
 
-                        limpar();
+                            limpar();
+                        }
                     }
                 }
             }
@@ -146,6 +159,6 @@ namespace ProjetoArcos
             }
         }
 
-      
+
     }
 }

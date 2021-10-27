@@ -88,7 +88,7 @@
 
     <div class="row">
         <div class="col-12 col-lg-4 row_buttons">
-            <asp:Button ID="btnNovo" runat="server" CssClass="btn btn-primary" Text="Novo" Width="100%"/>
+            <asp:Button ID="btnNovo" runat="server" CssClass="btn btn-primary" Text="Novo" Width="100%" OnClick="btnNovo_Click"/>
         </div>
 
         <div class="col-12 col-lg-4 row_buttons">

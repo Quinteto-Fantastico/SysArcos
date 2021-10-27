@@ -5,10 +5,13 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class frmbusca : System.Web.UI.Page
     {
+        private String COD_VIEW = "CTDR";
         protected void Page_Load(object sender, EventArgs e)
         {
         }
@@ -57,14 +60,31 @@ namespace ProjetoArcos
                 string id = grid.SelectedValue.ToString();
                 using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    DOADOR doador = entities.DOADOR.FirstOrDefault(x => x.ID.ToString().Equals(id));
-                    entities.DOADOR.Remove(doador);
-                    entities.SaveChanges();
+                    try
+                    {
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
+                            DOADOR doador = entities.DOADOR.FirstOrDefault(x => x.ID.ToString().Equals(id));
+                            entities.DOADOR.Remove(doador);
+                            entities.SaveChanges();
 
-                    grid.DataSource = null;
-                    grid.DataBind();
-                    grid.SelectedIndex = -1;
-                    Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
+                    }
+                    catch
+                    {
+                        Response.Write("<script>alert('Registro não pode ser removido!');</script>");
+                    }
                 }
             }
         }

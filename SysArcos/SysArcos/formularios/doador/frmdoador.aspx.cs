@@ -5,11 +5,14 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
+
 
 namespace ProjetoArcos
 {
     public partial class WebForm1 : System.Web.UI.Page
     {
+        private String COD_VIEW = "DADR";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -54,46 +57,63 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-                        DOADOR doador = new DOADOR();
-
-
-                        if (lblAcao.Text.Equals("NOVO"))
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
                         {
-                            doador = new DOADOR();
-                            doador.NOME = txt_nomedoador.Text;
-                            doador.LOGRADOURO = txt_logradouro.Text;
-                            doador.CEP = txt_CEP.Text;
-                            doador.CIDADE = txt_cidade.Text;
-                            doador.BAIRRO = txt_bairro.Text;
-                            doador.NUMERO = txt_numero.Text;
-                            doador.DISPONIBILIDADE = txt_disponibilidade.Text;
-                            doador.ESTADO = drp_estado.SelectedValue;
-                            doador.TIPO_DOACAO = txt_tipodoacao.Text;
-                            doador.ATIVO = cb_ativo.Checked;
-                            doador.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            entity.DOADOR.Add(doador);
+                            Response.Write("<script>alert('Permissão Negada');</script>");
                         }
                         else
                         {
-                            doador = entity.DOADOR.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+                            DOADOR doador = new DOADOR();
 
-                            doador.NOME = txt_nomedoador.Text;
-                            doador.LOGRADOURO = txt_logradouro.Text;
-                            doador.CEP = txt_CEP.Text;
-                            doador.CIDADE = txt_cidade.Text;
-                            doador.BAIRRO = txt_bairro.Text;
-                            doador.NUMERO = txt_numero.Text;
-                            doador.DISPONIBILIDADE = txt_disponibilidade.Text;
-                            doador.ESTADO = drp_estado.SelectedValue;
-                            doador.TIPO_DOACAO = txt_tipodoacao.Text;
-                            doador.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            doador.ATIVO = cb_ativo.Checked;
-                            entity.Entry(doador);
+
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                doador = new DOADOR();
+                                doador.NOME = txt_nomedoador.Text;
+                                doador.LOGRADOURO = txt_logradouro.Text;
+                                doador.CEP = txt_CEP.Text;
+                                doador.CIDADE = txt_cidade.Text;
+                                doador.BAIRRO = txt_bairro.Text;
+                                doador.NUMERO = txt_numero.Text;
+                                doador.DISPONIBILIDADE = txt_disponibilidade.Text;
+                                doador.ESTADO = drp_estado.SelectedValue;
+                                doador.TIPO_DOACAO = txt_tipodoacao.Text;
+                                doador.ATIVO = cb_ativo.Checked;
+                                doador.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                entity.DOADOR.Add(doador);
+                            }
+                            else
+                            {
+                                doador = entity.DOADOR.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+
+                                doador.NOME = txt_nomedoador.Text;
+                                doador.LOGRADOURO = txt_logradouro.Text;
+                                doador.CEP = txt_CEP.Text;
+                                doador.CIDADE = txt_cidade.Text;
+                                doador.BAIRRO = txt_bairro.Text;
+                                doador.NUMERO = txt_numero.Text;
+                                doador.DISPONIBILIDADE = txt_disponibilidade.Text;
+                                doador.ESTADO = drp_estado.SelectedValue;
+                                doador.TIPO_DOACAO = txt_tipodoacao.Text;
+                                doador.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                doador.ATIVO = cb_ativo.Checked;
+                                if(lblAcao.Text.Equals("NOVO"))
+                                {
+                                    entity.DOADOR.Add(doador);
+                                }
+                                else
+                                {
+                                    entity.Entry(doador);
+                                }
+                            }
+                            entity.SaveChanges();
+                            limpar();
+
+                            Response.Write("<script>alert('Doador salvo com Sucesso!');</script>");
                         }
-                        entity.SaveChanges();
-                        limpar();
-
-                        Response.Write("<script>alert('Doador salvo com Sucesso!');</script>");
                     }
                 }
                 catch

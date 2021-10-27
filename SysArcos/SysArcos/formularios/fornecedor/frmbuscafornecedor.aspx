@@ -64,7 +64,7 @@
         </div>
         <div class="col-12 col-lg-4 row_buttons">
             <asp:Button ID="btnRemover" runat="server" Text="Remover" CssClass="btn btn-primary"  Width="100%"
-                OnClientClick="return confirm('Deseja remover?');" />
+                OnClientClick="return confirm('Deseja remover?');" OnClick="btnRemover_Click" />
         </div>
     </div>
 </asp:Content>

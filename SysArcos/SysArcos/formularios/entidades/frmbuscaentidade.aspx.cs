@@ -7,10 +7,13 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class frmbuscaentidade : System.Web.UI.Page
     {
+        public string COD_VIEW = "CENT";
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -34,30 +37,47 @@ namespace ProjetoArcos
 
         protected void btnremover_Click(object sender, EventArgs e)
         {
+
             if (grid.SelectedValue != null)
             {
-                //String ID = Request.QueryString["ID"];
+                // String ID = Request.QueryString["ID"];
                 string ID = grid.SelectedValue.ToString();
                 int i = Convert.ToInt32(ID);
-                try
-                {
-                    using (ARCOS_Entities entities = new ARCOS_Entities())
-                    {
-                        ENTIDADE entidade = entities.ENTIDADE.FirstOrDefault(x => x.ID.Equals(i));
-                        entities.ENTIDADE.Remove(entidade);
-                        entities.SaveChanges();
 
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
-                    }
-                }
-                catch
+                using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    Response.Write("<script>alert('Falha ao remover registro!');</script>");
+                    try
+                    {
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                                        Session["usuariologado"].ToString(),
+                                                        COD_VIEW,
+                                                        entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
+                            
+                            ENTIDADE entidade = entities.ENTIDADE.FirstOrDefault(x => x.ID.Equals(i));
+                            entities.ENTIDADE.Remove(entidade);
+                            entities.SaveChanges();
+
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+
+                        }
+                    }
+                    catch
+                    {
+                        Response.Write("<script>alert('Falha ao remover registro!');</script>");
+                    }
+
                 }
+
             }
+
         }
 
         private void buscar()
@@ -96,7 +116,7 @@ namespace ProjetoArcos
                 String login = (String)Session["usuariologado"];
                 ArrayList entidades = (ArrayList)Session["entidades"];
                 USUARIO u = entities.USUARIO.First(linha => linha.LOGIN.Equals(login));
-                
+
                 if ((!u.ADM) && (entidades != null && entidades.Count > 0))
                 {
                     lista = lista.Where(x => entidades.Contains(x.ID)).ToList();

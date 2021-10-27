@@ -9,12 +9,16 @@ namespace SysArcos.formularios.recurso
 {
     public partial class recurso : System.Web.UI.Page
     {
+        private String COD_VIEW = "RECR";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
                 using (ARCOS_Entities conn = new ARCOS_Entities())
                 {
+                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
+                    validaPermissao(pagina);
+
                     carregarEntidade(conn);
                     carregarTipoRecurdo(conn);
                 }
@@ -48,6 +52,28 @@ namespace SysArcos.formularios.recurso
             ddlTipoRecurso.DataSource = lista;
             ddlTipoRecurso.DataBind();
             ddlTipoRecurso.Items.Insert(0, "");
+        }
+
+        private void validaPermissao(String pagina)
+        {
+            using (ARCOS_Entities entity = new ARCOS_Entities())
+            {
+                string login = (string)Session["usuariologado"];
+                USUARIO u =
+                    entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                if (!u.ADM)
+                {
+                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
+                    if (item != null)
+                    {
+                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                        if (perm == null)
+                        {
+                            Response.Redirect("/permissao_negada.aspx");
+                        }
+                    }
+                }
+            }
         }
     }
 }

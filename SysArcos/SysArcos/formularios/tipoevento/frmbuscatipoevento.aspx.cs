@@ -5,11 +5,13 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
 	public partial class frmbuscatipoevento : System.Web.UI.Page
 	{
-		protected void Page_Load(object sender, EventArgs e)
+        private String COD_VIEW = "TEVE";
+        protected void Page_Load(object sender, EventArgs e)
 		{
 
 		}
@@ -60,15 +62,28 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entities = new ARCOS_Entities())
                     {
-                        TIPO_EVENTO evento = entities.TIPO_EVENTO.FirstOrDefault(x => x.ID.ToString().Equals(tipo_evento));
-                        entities.TIPO_EVENTO.Remove(evento);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
 
-                        //limpar grid
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+
+
+                            TIPO_EVENTO evento = entities.TIPO_EVENTO.FirstOrDefault(x => x.ID.ToString().Equals(tipo_evento));
+                            entities.TIPO_EVENTO.Remove(evento);
+                            entities.SaveChanges();
+
+                            //limpar grid
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
                     }
                 }
                 catch

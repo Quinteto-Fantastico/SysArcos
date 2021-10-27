@@ -5,10 +5,13 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class frmTipoEvento : System.Web.UI.Page
     {
+        private String COD_VIEW = "CNTE";
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -48,44 +51,57 @@ namespace ProjetoArcos
             {
                 try
                 {
+
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-
-                        TIPO_EVENTO tipo_evento = null;
-
-                        if (lblAcao.Text.Equals("NOVO"))
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
                         {
-                            tipo_evento = new TIPO_EVENTO();
-                            //entidade.ID = Convert.ToInt32(txtID.Text);
-                            tipo_evento.NOME = txtTipoEvento.Text;
-                            tipo_evento.DESCRICAO = txtDescricaoEvento.Text;
-
-                            // Insere o objeto
-                            entity.TIPO_EVENTO.Add(tipo_evento);
-
+                            Response.Write("<script>alert('Permissão Negada');</script>");
                         }
                         else
                         {
-                            tipo_evento = entity.TIPO_EVENTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
 
-                            tipo_evento.NOME = txtTipoEvento.Text;
-                            tipo_evento.DESCRICAO = txtDescricaoEvento.Text;
 
-                            entity.Entry(tipo_evento);
+
+                            TIPO_EVENTO tipo_evento = null;
+
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                tipo_evento = new TIPO_EVENTO();
+                                //entidade.ID = Convert.ToInt32(txtID.Text);
+                                tipo_evento.NOME = txtTipoEvento.Text;
+                                tipo_evento.DESCRICAO = txtDescricaoEvento.Text;
+
+                                // Insere o objeto
+                                entity.TIPO_EVENTO.Add(tipo_evento);
+
+                            }
+                            else
+                            {
+                                tipo_evento = entity.TIPO_EVENTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+
+                                tipo_evento.NOME = txtTipoEvento.Text;
+                                tipo_evento.DESCRICAO = txtDescricaoEvento.Text;
+
+                                entity.Entry(tipo_evento);
+                            }
+
+
+                            //Salva no disco rígido
+                            entity.SaveChanges();
+
+                            limpar();
+
+                            // Commit
+                            Response.Write("<script>alert('Tipo de evento cadastrado com sucesso!');</script>");
+
+                            txtTipoEvento.Text = string.Empty;
+                            txtDescricaoEvento.Text = string.Empty;
+                            lblAcao.Text = "NOVO";
                         }
-
-
-                        //Salva no disco rígido
-                        entity.SaveChanges();
-
-                        limpar();
-
-                        // Commit
-                        Response.Write("<script>alert('Tipo de evento cadastrado com sucesso!');</script>");
-
-                        txtTipoEvento.Text = string.Empty;
-                        txtDescricaoEvento.Text = string.Empty;
-                        lblAcao.Text = "NOVO";
                     }
                 }
                 catch
