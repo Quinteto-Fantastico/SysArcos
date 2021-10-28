@@ -10,33 +10,10 @@ namespace SysArcos.formularios.Voluntariar
 {
     public partial class frmvoluntariar : System.Web.UI.Page
     {
+        private String COD_VIEW = "VLTR";
         protected void Page_Load(object sender, EventArgs e)
-
-
-             private void validapermisao(string pagina)
         {
-            using (ARCOS_Entities conn new ARCOS_Entities())
-                       
-            {
-                string login = (string)Session["usuariologado"];
 
-                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
-                if (!u.ADM)
-                {
-                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
-                    if (item != null)
-                    {
-                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
-                        if (perm == null)
-                        {
-                            Response.Redirect("/permissaonegada.aspx");
-                        }
-                    }
-
-                }
-            }
-        }
-        {
             if (!IsPostBack)
             {
                 using (ARCOS_Entities entities = new ARCOS_Entities())
@@ -57,7 +34,7 @@ namespace SysArcos.formularios.Voluntariar
                                     Txt_vdatainicial.Text = u.DATA_INICIAL.ToString("yyyy-MM-dd");
                                     Txt_vdatafinal.Text = u.DATA_FINAL.Value.ToString("yyyy-MM-dd");
                                     Ddl_voluntario.SelectedValue = u.VOLUNTARIO.ID.ToString();
-                                    Ddl_vvoluntariado.SelectedValue = u.VOLUNTARIADO.ID.ToString() ;
+                                    Ddl_vvoluntariado.SelectedValue = u.VOLUNTARIADO.ID.ToString();
                                     Txt_vobservacao.Text = u.OBSERVACAO;
 
                                 }
@@ -66,6 +43,7 @@ namespace SysArcos.formularios.Voluntariar
                     }
             }
         }
+
 
         protected void btnNovo_Click(object sender, EventArgs e)
         {
@@ -93,7 +71,7 @@ namespace SysArcos.formularios.Voluntariar
             using (ARCOS_Entities entity = new ARCOS_Entities())
             {
                 List<VOLUNTARIADO> lista = entity.VOLUNTARIADO.ToList();
-                
+
                 Ddl_vvoluntariado.DataSource = lista;
                 Ddl_vvoluntariado.DataTextField = "DESCRICAO";
                 Ddl_vvoluntariado.DataValueField = "ID";
@@ -108,7 +86,7 @@ namespace SysArcos.formularios.Voluntariar
             using (ARCOS_Entities entity = new ARCOS_Entities())
             {
                 List<VOLUNTARIO> lista = entity.VOLUNTARIO.ToList();
-               
+
                 Ddl_voluntario.DataSource = lista;
                 Ddl_voluntario.DataTextField = "NOME";
                 Ddl_voluntario.DataValueField = "ID";
@@ -130,39 +108,49 @@ namespace SysArcos.formularios.Voluntariar
                 {
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-
-                        VOLUNTARIAR voluntariar = null;
-
-                        if (lblAcao.Text.Equals("NOVO"))
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
                         {
-                            VOLUNTARIAR volunt = new VOLUNTARIAR();
-                            volunt.ID_VOLUNTARIO = Convert.ToInt32(Ddl_voluntario.SelectedValue.ToString());
-                            volunt.ID_VOLUNTARIADO = Convert.ToInt32(Ddl_vvoluntariado.SelectedValue.ToString());
-                            volunt.DATA_INICIAL = DateTime.ParseExact(Txt_vdatainicial.Text, "dd/MM/yyyy", null); ;
-                            volunt.DATA_FINAL = DateTime.ParseExact(Txt_vdatafinal.Text, "dd/MM/yyyy", null); ;
-                            volunt.OBSERVACAO = Txt_vobservacao.Text;
-                            volunt.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            entity.VOLUNTARIAR.Add(volunt);
-
-
+                            Response.Write("<script>alert('Permissão Negada');</script>");
                         }
                         else
                         {
-                            voluntariar = entity.VOLUNTARIAR.FirstOrDefault(x => x.ID.Equals(lblID.Text));
 
-                            VOLUNTARIAR volunt = new VOLUNTARIAR();
-                            volunt.ID_VOLUNTARIO = Convert.ToInt32(Ddl_voluntario.SelectedValue.ToString());
-                            volunt.ID_VOLUNTARIADO = Convert.ToInt32(Ddl_vvoluntariado.SelectedValue.ToString());
-                            volunt.DATA_INICIAL = DateTime.Now;
-                            volunt.DATA_FINAL = DateTime.Now;
-                            volunt.OBSERVACAO = Txt_vobservacao.Text;
-                            volunt.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            entity.Entry(volunt);
+                            VOLUNTARIAR voluntariar = null;
+
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                VOLUNTARIAR volunt = new VOLUNTARIAR();
+                                volunt.ID_VOLUNTARIO = Convert.ToInt32(Ddl_voluntario.SelectedValue.ToString());
+                                volunt.ID_VOLUNTARIADO = Convert.ToInt32(Ddl_vvoluntariado.SelectedValue.ToString());
+                                volunt.DATA_INICIAL = DateTime.ParseExact(Txt_vdatainicial.Text, "dd/MM/yyyy", null); ;
+                                volunt.DATA_FINAL = DateTime.ParseExact(Txt_vdatafinal.Text, "dd/MM/yyyy", null); ;
+                                volunt.OBSERVACAO = Txt_vobservacao.Text;
+                                volunt.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                entity.VOLUNTARIAR.Add(volunt);
+
+
+                            }
+                            else
+                            {
+                                voluntariar = entity.VOLUNTARIAR.FirstOrDefault(x => x.ID.Equals(lblID.Text));
+
+                                VOLUNTARIAR volunt = new VOLUNTARIAR();
+                                volunt.ID_VOLUNTARIO = Convert.ToInt32(Ddl_voluntario.SelectedValue.ToString());
+                                volunt.ID_VOLUNTARIADO = Convert.ToInt32(Ddl_vvoluntariado.SelectedValue.ToString());
+                                volunt.DATA_INICIAL = DateTime.Now;
+                                volunt.DATA_FINAL = DateTime.Now;
+                                volunt.OBSERVACAO = Txt_vobservacao.Text;
+                                volunt.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                entity.Entry(volunt);
+                            }
+                            limpar();
+                            entity.SaveChanges();
+
+                            Response.Write("<script>alert('Voluntariar salvo com Sucesso!');</script>");
                         }
-                        limpar();
-                        entity.SaveChanges();
-
-                        Response.Write("<script>alert('Voluntariar salvo com Sucesso!');</script>");
                     }
                 }
                 catch

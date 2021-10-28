@@ -7,37 +7,14 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
 using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class frmvoluntariado1 : System.Web.UI.Page
     {
-       
+        private String COD_VIEW = "VLDO";
         protected void Page_Load(object sender, EventArgs e)
 
-        {
-            private void validapermisao(string pagina)
-            {
-                using (ARCOS_Entities conn new ARCOS_Entities())
-                       
-            {
-                string login = (string)Session["usuariologado"];
-
-                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
-                if (!u.ADM)
-                {
-                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
-                    if (item != null)
-                    {
-                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
-                        if (perm == null)
-                        {
-                            Response.Redirect("/permissaonegada.aspx");
-                        }
-                    }
-
-                }
-            }
-        }
         {
             if (!IsPostBack)
             {
@@ -59,7 +36,33 @@ namespace ProjetoArcos
                         }
                     }
                 }
-                
+
+            }
+
+        }
+
+
+        private void validapermisao(string pagina)
+        {
+            using (ARCOS_Entities entity = new ARCOS_Entities())
+                       
+            {
+                string login = (string)Session["usuariologado"];
+
+                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                if (!u.ADM)
+                {
+                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
+                    if (item != null)
+                    {
+                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                        if (perm == null)
+                        {
+                            Response.Redirect("/permissaonegada.aspx");
+                        }
+                    }
+
+                }
             }
         }
 
@@ -101,42 +104,52 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-
-                        VOLUNTARIADO data = null;
-
-                        if (lbl_acao.Text.Equals("NOVO"))
+                        if (!Permissoes.validar(lbl_acao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
                         {
-                            data = new VOLUNTARIADO();
-                            data.ID_ENTIDADE = Convert.ToInt32(ddlEntidade.SelectedValue);
-                            data.DATA_INICIAL = DateTime.ParseExact(txtDataini.Text, "dd/MM/yyyy", null);
-                            data.DATA_FINAL = DateTime.ParseExact(txtDatafinal.Text, "dd/MM/yyyy", null);
-                            data.DESCRICAO = txtDesc.Text;
-                            data.OBSERVACAO = txtObser.Text;
-                            data.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            entity.VOLUNTARIADO.Add(data);
-
-
-                            entity.SaveChanges();
-
-                            Response.Write("<script>alert('Voluntariado salvo com Sucesso!');</script>");
+                            Response.Write("<script>alert('Permissão Negada');</script>");
                         }
                         else
                         {
-                            int id_vol = Convert.ToInt32(Request.QueryString["id"]);
-                            data = entity.VOLUNTARIADO.FirstOrDefault(x => x.ID.Equals(id_vol));
 
-                            data.ID_ENTIDADE = Convert.ToInt32(ddlEntidade.SelectedValue);
-                            data.DATA_INICIAL = DateTime.Now;
-                            data.DATA_FINAL = DateTime.Now;
-                            data.DESCRICAO = txtDesc.Text;
-                            data.OBSERVACAO = txtObser.Text;
-                            data.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            entity.Entry(data);
+                            VOLUNTARIADO data = null;
 
-                            Response.Write("<script>alert('Voluntariado alterado com Sucesso!');</script>");
+                            if (lbl_acao.Text.Equals("NOVO"))
+                            {
+                                data = new VOLUNTARIADO();
+                                data.ID_ENTIDADE = Convert.ToInt32(ddlEntidade.SelectedValue);
+                                data.DATA_INICIAL = DateTime.ParseExact(txtDataini.Text, "dd/MM/yyyy", null);
+                                data.DATA_FINAL = DateTime.ParseExact(txtDatafinal.Text, "dd/MM/yyyy", null);
+                                data.DESCRICAO = txtDesc.Text;
+                                data.OBSERVACAO = txtObser.Text;
+                                data.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                entity.VOLUNTARIADO.Add(data);
+
+
+                                entity.SaveChanges();
+
+                                Response.Write("<script>alert('Voluntariado salvo com Sucesso!');</script>");
+                            }
+                            else
+                            {
+                                int id_vol = Convert.ToInt32(Request.QueryString["id"]);
+                                data = entity.VOLUNTARIADO.FirstOrDefault(x => x.ID.Equals(id_vol));
+
+                                data.ID_ENTIDADE = Convert.ToInt32(ddlEntidade.SelectedValue);
+                                data.DATA_INICIAL = DateTime.Now;
+                                data.DATA_FINAL = DateTime.Now;
+                                data.DESCRICAO = txtDesc.Text;
+                                data.OBSERVACAO = txtObser.Text;
+                                data.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                entity.Entry(data);
+
+                                Response.Write("<script>alert('Voluntariado alterado com Sucesso!');</script>");
+                            }
+                            entity.SaveChanges();
+                            limpar();
                         }
-                        entity.SaveChanges();
-                        limpar();
                     }
                 }
                 catch

@@ -6,37 +6,16 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
-using using SysArcos.utils;
+using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class frmvoluntariado : System.Web.UI.Page
     {
+        private String COD_VIEW = "COAR";
         protected void Page_Load(object sender, EventArgs e)
         {
-            {
-                private void validapermisao(string pagina)
-                {
-                    using (ARCOS_Entities conn new ARCOS_Entities())
-                       
-            {
-                    string login = (string)Session["usuariologado"];
-
-                    USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
-                    if (!u.ADM)
-                    {
-                        SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
-                    if (item != null)
-                        {
-                            SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
-                            if (perm == null)
-                            {
-                                Response.Redirect("/permissaonegada.aspx");
-                            }
-                        }
-
-                    }
-                }
-            }
+           
         }
 
         protected void btn_Buscar_Click(object sender, EventArgs e)
@@ -65,8 +44,8 @@ namespace ProjetoArcos
                     }
 
                     //Verifica se usuário é administrador
-                    String login = (String) Session["usuariologado"];
-                    USUARIO usuario = entities.USUARIO.Where(linha=>linha.LOGIN.ToString().Equals(login)).FirstOrDefault();
+                    String login = (String)Session["usuariologado"];
+                    USUARIO usuario = entities.USUARIO.Where(linha => linha.LOGIN.ToString().Equals(login)).FirstOrDefault();
                     if (!usuario.ADM)
                     {
                         ArrayList entidades = (ArrayList)Session["entidades"];
@@ -101,15 +80,25 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entities = new ARCOS_Entities())
                     {
-                        VOLUNTARIADO volunt = entities.VOLUNTARIADO.FirstOrDefault(x => x.ID.Equals(id));
-                        entities.VOLUNTARIADO.Remove(volunt);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
+                            VOLUNTARIADO volunt = entities.VOLUNTARIADO.FirstOrDefault(x => x.ID.Equals(id));
+                            entities.VOLUNTARIADO.Remove(volunt);
+                            entities.SaveChanges();
 
-                        //Limpar Grid 
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            //Limpar Grid 
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
                     }
                 }
                 catch

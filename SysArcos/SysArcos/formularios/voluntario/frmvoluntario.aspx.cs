@@ -11,33 +11,10 @@ namespace ProjetoArcos
 {
     public partial class frmvoluntario : System.Web.UI.Page
     {
+        private String COD_VIEW = "VLTO";
         protected void Page_Load(object sender, EventArgs e)
-
-           private void validapermisao(string pagina)
         {
-            using (ARCOS_Entities conn new ARCOS_Entities())
-                       
-            {
-                string login = (string)Session["usuariologado"];
 
-                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
-                if (!u.ADM)
-                {
-                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
-                    if (item != null)
-                    {
-                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
-                        if (perm == null)
-                        {
-                            Response.Redirect("/permissaonegada.aspx");
-                        }
-                    }
-
-                   }
-            }
-        }
-        {
-            
             if (!IsPostBack)
             {
                 String id = Request.QueryString["id"];
@@ -75,44 +52,54 @@ namespace ProjetoArcos
             {
                 using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-
-                    if (!verifica_CPF_Repetido(txt_vcpf.Text, entities))
+                    if (!Permissoes.validar(lbl_Status.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entities))
                     {
-                        VOLUNTARIO voluntario = new VOLUNTARIO();
-
-                        if (txt_vnome.Text == "" || txt_vcpf.Text == "" || txt_vendereco.Text == "" || txt_vnumero.Text == "" || txt_vBairro.Text == ""
-                            || txt_vcep.Text == "" || txt_vCidade.Text == "" || drp_vEstado.Text == "" || txt_vDispo.Text == "" || txt_vSerDisp.Text == "")
+                        Response.Write("<script>alert('Permissão Negada');</script>");
+                    }
+                    else
+                    {
+                        if (!verifica_CPF_Repetido(txt_vcpf.Text, entities))
                         {
-                            Response.Write("<script>alert('Há campos obrigatórios não preenchidos!');</script>");
-                        }
-                        else
-                        {
-                            if (lbl_Status.Text.Equals("NOVO"))
-                                voluntario = new VOLUNTARIO();
+
+                            VOLUNTARIO voluntario = new VOLUNTARIO();
+
+                            if (txt_vnome.Text == "" || txt_vcpf.Text == "" || txt_vendereco.Text == "" || txt_vnumero.Text == "" || txt_vBairro.Text == ""
+                                || txt_vcep.Text == "" || txt_vCidade.Text == "" || drp_vEstado.Text == "" || txt_vDispo.Text == "" || txt_vSerDisp.Text == "")
+                            {
+                                Response.Write("<script>alert('Há campos obrigatórios não preenchidos!');</script>");
+                            }
                             else
-                                voluntario = entities.VOLUNTARIO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+                            {
+                                if (lbl_Status.Text.Equals("NOVO"))
+                                    voluntario = new VOLUNTARIO();
+                                else
+                                    voluntario = entities.VOLUNTARIO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
 
-                            voluntario.NOME = txt_vnome.Text;
-                            voluntario.CPF = txt_vcpf.Text;
-                            voluntario.LOGRADOURO = txt_vendereco.Text;
-                            voluntario.NUMERO = txt_vnumero.Text;
-                            voluntario.BAIRRO = txt_vBairro.Text;
-                            voluntario.CEP = txt_vcep.Text;
-                            voluntario.CIDADE = txt_vCidade.Text;
-                            voluntario.ESTADO = drp_vEstado.Text;
-                            voluntario.DISPONIBILIDADE = txt_vDispo.Text;
-                            voluntario.SERVICOS_DISPONIVEIS = txt_vSerDisp.Text;
-                            voluntario.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                voluntario.NOME = txt_vnome.Text;
+                                voluntario.CPF = txt_vcpf.Text;
+                                voluntario.LOGRADOURO = txt_vendereco.Text;
+                                voluntario.NUMERO = txt_vnumero.Text;
+                                voluntario.BAIRRO = txt_vBairro.Text;
+                                voluntario.CEP = txt_vcep.Text;
+                                voluntario.CIDADE = txt_vCidade.Text;
+                                voluntario.ESTADO = drp_vEstado.Text;
+                                voluntario.DISPONIBILIDADE = txt_vDispo.Text;
+                                voluntario.SERVICOS_DISPONIVEIS = txt_vSerDisp.Text;
+                                voluntario.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
 
-                            if (lbl_Status.Text.Equals("NOVO"))
-                                entities.VOLUNTARIO.Add(voluntario);
-                            else
-                                entities.Entry(voluntario);
+                                if (lbl_Status.Text.Equals("NOVO"))
+                                    entities.VOLUNTARIO.Add(voluntario);
+                                else
+                                    entities.Entry(voluntario);
 
-                            limpar();
+                                limpar();
+                            }
+                            entities.SaveChanges();
+                            Response.Write("<script>alert('Voluntario Cadastrado com Sucesso!');</script>");
                         }
-                        entities.SaveChanges();
-                        Response.Write("<script>alert('Voluntario Cadastrado com Sucesso!');</script>");
                     }
                 }
             }

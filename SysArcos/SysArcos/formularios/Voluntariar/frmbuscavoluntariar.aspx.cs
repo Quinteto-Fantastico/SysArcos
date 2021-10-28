@@ -8,34 +8,13 @@ using SysArcos.utils;
 
 namespace SysArcos
 {
-    public partial class WebForm1 : System.Web.UI.Page
+    public partial class buscarvoluntariar : System.Web.UI.Page
     {
+        private String COD_VIEW = "CSNT";
         protected void Page_Load(object sender, EventArgs e)
         {
-            private void validapermisao(string pagina)
-            {
-                using (ARCOS_Entities conn new ARCOS_Entities())
-                       
-            {
-                string login = (string)Session["usuariologado"];
 
-                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
-                if (!u.ADM)
-                {
-                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
-                    if (item != null)
-                    {
-                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
-                        if (perm == null)
-                        {
-                            Response.Redirect("/permissaonegada.aspx");
-                        }
-                    }
-
-                }
-            }
         }
-    }
 
         protected void btnBuscar_Click(object sender, EventArgs e)
         {
@@ -66,20 +45,40 @@ namespace SysArcos
 
         protected void btnRemover_Click(object sender, EventArgs e)
         {
-            ARCOS_Entities conexao = new ARCOS_Entities();
+            try
+            {
+                using (ARCOS_Entities entity = new ARCOS_Entities())
+                {
+                    if (!Permissoes.validar(Acoes.REMOVER,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
+                    {
+                        Response.Write("<script>alert('Permissão negada!');</script>");
+                    }
+                    else
+                    {
+                        int IDSelecionado = Convert.ToInt32(grid.SelectedValue.ToString());
 
-            int IDSelecionado = Convert.ToInt32(grid.SelectedValue.ToString());
+                        VOLUNTARIAR aluno = entity.VOLUNTARIAR.FirstOrDefault(
+                           linha => linha.ID.ToString().Equals(IDSelecionado.ToString())
+                           );
 
-            VOLUNTARIAR aluno = conexao.VOLUNTARIAR.FirstOrDefault(
-                    linha => linha.ID.ToString().Equals(IDSelecionado.ToString())
-                    );
+                        entity.VOLUNTARIAR.Remove(aluno);
 
-            conexao.VOLUNTARIAR.Remove(aluno);
+                        entity.SaveChanges();
 
-            conexao.SaveChanges();
-
-            atualizaGrid(conexao);
+                        //atualizaGrid(conexao);
+                    }
+                }
+            }
+            catch
+            {
+                Response.Write("<script>alert('Registro não pode ser salvo!');</script>");
+            }
         }
+
+
 
         private void atualizaGrid(ARCOS_Entities conexao)
         {

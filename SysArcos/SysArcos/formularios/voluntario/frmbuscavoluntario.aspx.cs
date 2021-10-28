@@ -6,36 +6,19 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
 using SysArcos.utils;
+
 namespace ProjetoArcos
 {
     public partial class frmbuscavoluntario : System.Web.UI.Page
     {
+        private String COD_VIEW = "CNVO";
         protected void Page_Load(object sender, EventArgs e)
         {
-            private void validapermisao(string pagina)
-            {
-                using (ARCOS_Entities conn new ARCOS_Entities())
-                       
-            {
-                string login = (string)Session["usuariologado"];
 
-                USUARIO u = entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
-                if (!u.ADM)
-                {
-                    SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => .URL.Equals(pagina));)
-                    if (item != null)
-                    {
-                        SISTEMA_ITEM_ENTIDADE perm = u.GRUPO.PERMISSÃO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
-                        if (perm == null)
-                        {
-                            Response.Redirect("/permissaonegada.aspx");
-                        }
-                    }
-
-                }
-            }
         }
-    }
+
+
+
 
         protected void btn_Voltar_Click(object sender, EventArgs e)
         {
@@ -52,16 +35,26 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entities = new ARCOS_Entities())
                     {
-                        // USUARIO usuario = entities.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login)); // Linha que deu origem ao comando abaixo.
-                        VOLUNTARIO voluntario = entities.VOLUNTARIO.FirstOrDefault(x => x.ID.ToString().Equals(ID));
-                        entities.VOLUNTARIO.Remove(voluntario);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
+                            // USUARIO usuario = entities.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login)); // Linha que deu origem ao comando abaixo.
+                            VOLUNTARIO voluntario = entities.VOLUNTARIO.FirstOrDefault(x => x.ID.ToString().Equals(ID));
+                            entities.VOLUNTARIO.Remove(voluntario);
+                            entities.SaveChanges();
 
-                        //Limpar Grid 
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Voluntário removido com sucesso!');</script>");
+                            //Limpar Grid 
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Voluntário removido com sucesso!');</script>");
+                        }
                     }
                 }
                 catch
@@ -102,19 +95,19 @@ namespace ProjetoArcos
             if (grid.SelectedValue != null)
                 // Redireciona para a página de cadastro de voluntário com o id como parâmetro.
                 Response.Redirect("frmvoluntario.aspx?id=" + grid.SelectedValue.ToString());
-                
+
         }
 
         protected void rd_Nome_Click(object sender, EventArgs e)
         {
             //rd_CPF.Checked = false;
             //rd_Nome.Checked = true;
-            
+
         }
 
-        protected void rd_CPF_Click  (object sender, EventArgs e)
+        protected void rd_CPF_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         protected void grid_SelectedIndexChanged(object sender, EventArgs e)
