@@ -5,10 +5,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class frmproduto : System.Web.UI.Page
     {
+        private String COD_VIEW = "PROT";
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -58,39 +60,51 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-
-                        PRODUTO produto = null;
-
-
-                        if (lblAcao.Text.Equals("NOVO"))
+                        if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
                         {
-                            produto = new PRODUTO();
-                            produto.DESCRICAO = txt_descricao.Text;
-
-                            produto.ESPECIFICACOES = txt_especificacao.Text;
-                            produto.UNIDADE = txt_unidade.Text;
-                            produto.ID_CATEGORIA = Convert.ToInt32(dlCategoria.SelectedValue);
-                            produto.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-
-                            entity.PRODUTO.Add(produto);
+                            Response.Write("<script>alert('Permissão Negada');</script>");
                         }
                         else
                         {
-                            produto = entity.PRODUTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
 
 
-                            produto.DESCRICAO = txt_descricao.Text;
-                            produto.ESPECIFICACOES = txt_especificacao.Text;
-                            produto.UNIDADE = txt_unidade.Text;
-                            produto.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            produto.ID_CATEGORIA = Convert.ToInt32(dlCategoria.SelectedValue);
 
-                            entity.Entry(produto);
+                            PRODUTO produto = null;
+
+
+                            if (lblAcao.Text.Equals("NOVO"))
+                            {
+                                produto = new PRODUTO();
+                                produto.DESCRICAO = txt_descricao.Text;
+
+                                produto.ESPECIFICACOES = txt_especificacao.Text;
+                                produto.UNIDADE = txt_unidade.Text;
+                                produto.ID_CATEGORIA = Convert.ToInt32(dlCategoria.SelectedValue);
+                                produto.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+
+                                entity.PRODUTO.Add(produto);
+                            }
+                            else
+                            {
+                                produto = entity.PRODUTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+
+
+                                produto.DESCRICAO = txt_descricao.Text;
+                                produto.ESPECIFICACOES = txt_especificacao.Text;
+                                produto.UNIDADE = txt_unidade.Text;
+                                produto.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                produto.ID_CATEGORIA = Convert.ToInt32(dlCategoria.SelectedValue);
+
+                                entity.Entry(produto);
+                            }
+                            limpar();
+                            entity.SaveChanges();
+
+                            Response.Write("<script>alert('Produto salvo com Sucesso!');</script>");
                         }
-                        limpar();
-                        entity.SaveChanges();
-
-                        Response.Write("<script>alert('Produto salvo com Sucesso!');</script>");
                     }
                 }
                 catch

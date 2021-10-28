@@ -58,7 +58,7 @@
         </div>
         <div class="row">
             <div class="col-12 col-lg-4 row_buttons">
-                <asp:Button ID="Button1" runat="server" Width="100%" CssClass="btn btn-primary" Text="Novo" />
+                <asp:Button ID="Button1" runat="server" Width="100%" CssClass="btn btn-primary" Text="Novo" OnClick="Button1_Click" />
             </div>
             <div class="col-12 col-lg-4 row_buttons">
                 <asp:Button ID="Button2" runat="server" Width="100%" CssClass="btn btn-primary" Text="Salvar" ValidationGroup="form" />

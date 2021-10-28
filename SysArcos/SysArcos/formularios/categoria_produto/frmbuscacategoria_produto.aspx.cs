@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
+using SysArcos.utils;
 using System.Web.UI.WebControls;
 
 namespace SysArcos.formularios.categoria_produto
 {
     public partial class frmbuscacategoria_produto : System.Web.UI.Page
     {
+        private String COD_VIEW = "CATT";
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -44,14 +46,26 @@ namespace SysArcos.formularios.categoria_produto
                 {
                     using (ARCOS_Entities entities = new ARCOS_Entities())
                     {
-                        CATEGORIA_PRODUTO cat = entities.CATEGORIA_PRODUTO.FirstOrDefault(x => x.ID.Equals(i));
-                        entities.CATEGORIA_PRODUTO.Remove(cat);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
 
-                        gridBusca.DataSource = null;
-                        gridBusca.DataBind();
-                        gridBusca.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+
+                            CATEGORIA_PRODUTO cat = entities.CATEGORIA_PRODUTO.FirstOrDefault(x => x.ID.Equals(i));
+                            entities.CATEGORIA_PRODUTO.Remove(cat);
+                            entities.SaveChanges();
+
+                            gridBusca.DataSource = null;
+                            gridBusca.DataBind();
+                            gridBusca.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
                     }
                 }
                 catch

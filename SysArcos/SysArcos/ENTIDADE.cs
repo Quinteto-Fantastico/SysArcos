@@ -59,6 +59,12 @@ namespace SysArcos
         public virtual ICollection<EVENTO> EVENTO { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<FORNECIMENTO> FORNECIMENTO { get; set; }
+
+        internal ENTIDADE FirstOrDefault(Func<object, object> p)
+        {
+            throw new NotImplementedException();
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<RECURSO> RECURSO { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

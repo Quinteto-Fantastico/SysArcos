@@ -5,10 +5,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class frmbuscaproduto : System.Web.UI.Page
     {
+        private String COD_VIEW = "CSPO";
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -21,7 +23,7 @@ namespace ProjetoArcos
 
         protected void btnSelecionar_Click(object sender, EventArgs e)
         {
-            if (grid.SelectedValue != null)               
+            if (grid.SelectedValue != null)
                 Response.Redirect("frmproduto.aspx?descricao=" + grid.SelectedValue.ToString());
         }
 
@@ -35,15 +37,26 @@ namespace ProjetoArcos
                 {
                     using (ARCOS_Entities entities = new ARCOS_Entities())
                     {
-                        PRODUTO produto = entities.PRODUTO.FirstOrDefault(x => x.DESCRICAO.Equals(descricao));
-                        entities.PRODUTO.Remove(produto);
-                        entities.SaveChanges();
+                        if (!Permissoes.validar(Acoes.REMOVER,
+                                            Session["usuariologado"].ToString(),
+                                            COD_VIEW,
+                                            entities))
+                        {
+                            Response.Write("<script>alert('Permissão negada!');</script>");
+                        }
+                        else
+                        {
 
-                        //Limpar Grid 
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            PRODUTO produto = entities.PRODUTO.FirstOrDefault(x => x.DESCRICAO.Equals(descricao));
+                            entities.PRODUTO.Remove(produto);
+                            entities.SaveChanges();
+
+                            //Limpar Grid 
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                        }
                     }
                 }
                 catch

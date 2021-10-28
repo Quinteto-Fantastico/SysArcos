@@ -33,5 +33,10 @@ namespace SysArcos
         public virtual ICollection<ESTOQUE> ESTOQUE { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<FORNECIMENTO_ITENS> FORNECIMENTO_ITENS { get; set; }
+
+        internal PRODUTO FirstOrDefault(Func<object, object> p)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

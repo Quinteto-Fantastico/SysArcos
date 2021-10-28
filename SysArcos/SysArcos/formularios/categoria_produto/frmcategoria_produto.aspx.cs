@@ -5,10 +5,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using SysArcos;
+using SysArcos.utils;
 namespace ProjetoArcos
 {
     public partial class frmcategoria_produto : System.Web.UI.Page
     {
+        private String COD_VIEW = "TPRT";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -50,32 +52,44 @@ namespace ProjetoArcos
             {
                 using (ARCOS_Entities entity = new ARCOS_Entities())
                 {
-
-                    CATEGORIA_PRODUTO categoria = null;
-
-                    if (txtcategoria.Text == "")
+                    if (!Permissoes.validar(lblAcao.Text.Equals("NOVO") ? Acoes.INCLUIR : Acoes.ALTERAR,
+                                                Session["usuariologado"].ToString(),
+                                                COD_VIEW,
+                                                entity))
                     {
-                        Response.Write("<script>alert('Há campos obrigatorios não preenchidos!');</script>");
+                        Response.Write("<script>alert('Permissão Negada');</script>");
                     }
                     else
                     {
-                        if (lblAcao.Text.ToString().Equals("NOVO"))
+
+                    
+
+                        CATEGORIA_PRODUTO categoria = null;
+
+                        if (txtcategoria.Text == "")
                         {
-                            categoria = new CATEGORIA_PRODUTO();
-                            categoria.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            categoria.DESCRICAO = txtcategoria.Text;
-                            entity.CATEGORIA_PRODUTO.Add(categoria);
+                            Response.Write("<script>alert('Há campos obrigatorios não preenchidos!');</script>");
                         }
                         else
                         {
-                            categoria = entity.CATEGORIA_PRODUTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
-                            categoria.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
-                            categoria.DESCRICAO = txtcategoria.Text;
-                            entity.Entry(categoria);
+                            if (lblAcao.Text.ToString().Equals("NOVO"))
+                            {
+                                categoria = new CATEGORIA_PRODUTO();
+                                categoria.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                categoria.DESCRICAO = txtcategoria.Text;
+                                entity.CATEGORIA_PRODUTO.Add(categoria);
+                            }
+                            else
+                            {
+                                categoria = entity.CATEGORIA_PRODUTO.FirstOrDefault(x => x.ID.ToString().Equals(lblID.Text));
+                                categoria.DATA_HORA_CRIACAO_REGISTRO = DateTime.Now;
+                                categoria.DESCRICAO = txtcategoria.Text;
+                                entity.Entry(categoria);
+                            }
+                            txtcategoria.Text = string.Empty;
+                            entity.SaveChanges();
+                            Response.Write("<script>alert('Cadastrado Com Sucesso!');</script>");
                         }
-                        txtcategoria.Text = string.Empty;
-                        entity.SaveChanges();
-                        Response.Write("<script>alert('Cadastrado Com Sucesso!');</script>");
                     }
                 }
             }
