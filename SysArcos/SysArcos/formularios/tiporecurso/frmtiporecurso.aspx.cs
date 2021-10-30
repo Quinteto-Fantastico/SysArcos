@@ -18,9 +18,6 @@ namespace ProjetoArcos
             {
                 using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
-                    validaPermissao(pagina);
-
                     String ID = Request.QueryString["ID"];
                     if ((ID != null) && (!ID.Equals("")))
                     {

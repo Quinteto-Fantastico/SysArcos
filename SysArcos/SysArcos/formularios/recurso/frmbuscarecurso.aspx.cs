@@ -12,15 +12,7 @@ namespace SysArcos.formularios.recurso
         private String COD_VIEW = "CORO";
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                using (ARCOS_Entities conn = new ARCOS_Entities())
-                {
-                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
-                    validaPermissao(pagina);
 
-                }
-            }
         }
 
         protected void Button2_Click(object sender, EventArgs e)

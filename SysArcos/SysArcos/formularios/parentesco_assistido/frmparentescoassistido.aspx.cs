@@ -17,8 +17,6 @@ namespace SysArcos.formularios.parentesco_assistido
             {
                 using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
-                    validaPermissao(pagina);
 
                     String parentesco = Request.QueryString["ID"];
                     if ((parentesco != null) && (!parentesco.Equals("")))

@@ -13,10 +13,7 @@ namespace ProjetoArcos
         private String COD_VIEW = "ASST";
         protected void Page_Load(object sender, EventArgs e)
         {
-            using(ARCOS_Entities conn = new ARCOS_Entities())
-            {
-                String pagina = HttpContext.Current.Request.Url.AbsolutePath;
-            }
+
         }
         protected void btnCancelar_Click(object sender, EventArgs e)
         {

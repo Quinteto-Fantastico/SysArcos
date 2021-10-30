@@ -14,15 +14,7 @@ namespace ProjetoArcos
         private String COD_VIEW = "COUR";
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                using (ARCOS_Entities entities = new ARCOS_Entities())
-                {
-                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
-                    validaPermissao(pagina);
 
-                }
-            }
         }
         private void validaPermissao(String pagina)
         {

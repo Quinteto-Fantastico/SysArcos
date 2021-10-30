@@ -16,8 +16,6 @@ namespace SysArcos.formularios.recurso
             {
                 using (ARCOS_Entities conn = new ARCOS_Entities())
                 {
-                    String pagina = HttpContext.Current.Request.Url.AbsolutePath;
-                    validaPermissao(pagina);
 
                     carregarEntidade(conn);
                     carregarTipoRecurdo(conn);
