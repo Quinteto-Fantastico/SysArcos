@@ -18,19 +18,38 @@ namespace ProjetoArcos
                 if (!pagina.Equals("/AlterarSenhaProxLogin.aspx"))
                     verificarSenhaPrimeiroLogin();
 
-                String login = (string)Session["usuariologado"]; //Neste caso deve-se fazer a conversão
+                String login = (string)Session["usuariologado"];
+
                 if (login != null)
                 {
+
                     using (ARCOS_Entities entity = new ARCOS_Entities())
                     {
-                        string permissao = "";
+
+                        USUARIO u =
+                            entity.USUARIO.FirstOrDefault(linha => linha.LOGIN.Equals(login));
+                        if (!u.ADM)
+                        {
+                            SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
+                            if (item != null)
+                            {
+                                SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
+                                if (perm == null)
+                                {
+                                    Response.Redirect("/permissao_negada.aspx");
+                                }
+                            }
+                        }
+                        /*string permissao = "";
                         USUARIO u = entity.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login));
                         if (u.GRUPO_PERMISSAO != null)
                             permissao = u.GRUPO_PERMISSAO.DESCRICAO;
-                        lbl_welcomeUser.Text = (u.NOME + "("+ permissao +")"); // em 'u' vai recuperar o atributo NOME
+                        lbl_welcomeUser.Text = (u.NOME + "(" + permissao + ")"); // em 'u' vai recuperar o atributo NOME*/
+                        
 
                         carregaItensMenu(entity);
                     }
+
                 }
 
                 else
@@ -71,7 +90,7 @@ namespace ProjetoArcos
                     Response.Redirect("/AlterarSenhaProxLogin.aspx");
                 }
             }
-            
+
         }
     }
 }
