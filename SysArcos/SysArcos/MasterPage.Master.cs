@@ -40,12 +40,6 @@ namespace ProjetoArcos
                                 }
                             }
                         }
-                        /*string permissao = "";
-                        USUARIO u = entity.USUARIO.FirstOrDefault(x => x.LOGIN.Equals(login));
-                        if (u.GRUPO_PERMISSAO != null)
-                            permissao = u.GRUPO_PERMISSAO.DESCRICAO;
-                        lbl_welcomeUser.Text = (u.NOME + "(" + permissao + ")"); // em 'u' vai recuperar o atributo NOME*/
-                        
 
                         carregaItensMenu(entity);
                     }

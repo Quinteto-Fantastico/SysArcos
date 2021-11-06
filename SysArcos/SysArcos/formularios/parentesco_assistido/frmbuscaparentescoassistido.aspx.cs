@@ -9,6 +9,7 @@ namespace SysArcos.formularios.parentesco_assistido
 {
     public partial class frmbuscaparentescoassistido : System.Web.UI.Page
     {
+        private String COD_VIEW = "CPCA";
         protected void Page_Load(object sender, EventArgs e)
         {
 
@@ -43,25 +44,35 @@ namespace SysArcos.formularios.parentesco_assistido
             if (grid.SelectedValue != null)
             {
                 string parentesco = grid.SelectedValue.ToString();
-                //obtendo a conexão com o banco de dados
-                try
+                using (ARCOS_Entities entities = new ARCOS_Entities())
                 {
-                    using (ARCOS_Entities entities = new ARCOS_Entities())
+                    try
                     {
-                        GRAU_DEPENDENCIA gd = entities.GRAU_DEPENDENCIA.FirstOrDefault(x => x.ID.ToString().Equals(parentesco));
-                        entities.GRAU_DEPENDENCIA.Remove(gd);
-                        entities.SaveChanges();
+                       // if (!Permissoes.validar(Acoes.REMOVER,
+                        //Session["usuariologado"].ToString(),
+                       // COD_VIEW,
+                       // entities))
+                       // {
+                        //    Response.Write("<script>alert('Permissão negada!');</script>");
+                       // }
+                       // else
+                       // {
+                            GRAU_DEPENDENCIA gd = entities.GRAU_DEPENDENCIA.FirstOrDefault(x => x.ID.ToString().Equals(parentesco));
+                            entities.GRAU_DEPENDENCIA.Remove(gd);
+                            entities.SaveChanges();
 
-                        //limpar grid
-                        grid.DataSource = null;
-                        grid.DataBind();
-                        grid.SelectedIndex = -1;
-                        Response.Write("<script>alert('Removido com sucesso!');</script>");
+                            //limpar grid
+                            grid.DataSource = null;
+                            grid.DataBind();
+                            grid.SelectedIndex = -1;
+                            Response.Write("<script>alert('Removido com sucesso!');</script>");
+                       // }
                     }
-                }
-                catch
-                {
-                    Response.Write("<script>alert('Falha ao remover registro!');</script>");
+
+                    catch
+                    {
+                        Response.Write("<script>alert('Falha ao remover registro!');</script>");
+                    }
                 }
             }
         }

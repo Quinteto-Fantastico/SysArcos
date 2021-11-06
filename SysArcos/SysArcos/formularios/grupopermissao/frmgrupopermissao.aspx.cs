@@ -9,6 +9,7 @@ namespace SysArcos.formularios.usuario
 {
     public partial class frmgrupopermissao : System.Web.UI.Page
     {
+        private String COD_VIEW = "GRPM";
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -253,7 +254,7 @@ namespace SysArcos.formularios.usuario
 
                 }
             }
-            foreach(SISTEMA_ITEM_ENTIDADE i in remocoes)
+            foreach (SISTEMA_ITEM_ENTIDADE i in remocoes)
             {
                 conn.SISTEMA_ITEM_ENTIDADE.Remove(i);
             }
