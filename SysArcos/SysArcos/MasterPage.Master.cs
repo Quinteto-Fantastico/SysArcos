@@ -31,7 +31,7 @@ namespace ProjetoArcos
                         if (!u.ADM)
                         {
                             SISTEMA_ENTIDADE item = entity.SISTEMA_ENTIDADE.FirstOrDefault(x => x.URL.Equals(pagina));
-                            if (item != null)
+                            if ( item!= null && item.COD_VIEW != null)
                             {
                                 SISTEMA_ITEM_ENTIDADE perm = u.GRUPO_PERMISSAO.SISTEMA_ITEM_ENTIDADE.FirstOrDefault(x => x.ID_SISTEMA_ENTIDADE.ToString().Equals(item.ID.ToString()));
                                 if (perm == null)
@@ -39,6 +39,7 @@ namespace ProjetoArcos
                                     Response.Redirect("/permissao_negada.aspx");
                                 }
                             }
+                       
                         }
 
                         carregaItensMenu(entity);
